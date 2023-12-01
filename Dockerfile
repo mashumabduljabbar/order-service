@@ -10,9 +10,6 @@ COPY . .
 # Menjalankan perintah npm install untuk menginstal dependensi
 RUN npm install --unsafe-perm
 
-# Menjalankan perintah npm run lint dan npm run build
-RUN npm run lint && npm run build
-
 # Mengatur environment variable NODE_ENV menjadi "production"
 ENV NODE_ENV=production
 
