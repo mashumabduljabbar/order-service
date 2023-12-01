@@ -1,0 +1,49 @@
+# Buat nama dari Tugas
+name: Publish to Docker
+on:
+  # Menjalankan tugas saat ada push ke branch main
+  push:
+    branches:
+      - main
+  release:
+    types: [published]
+# Tugas-tugas yang akan dijalankan
+jobs:
+  publish-image:
+    # Menjalankan tugas pada mesin Ubuntu terbaru
+    runs-on: ubuntu-latest
+    # Izin untuk akses ke repositori dan paket Docker
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      # Langkah pertama: Checkout kode dari repositori
+      - name: Checkout
+        uses: actions/checkout@v4
+      # Langkah kedua: Metadata Docker
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/mashumabduljabbar/order-service
+          tags: latest
+      # Langkah ketiga: Login ke GHCR (GitHub Container Registry)
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # Langkah keempat: Lint Dockerfile menggunakan hadolint
+      - name: lint-dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+      # Langkah kelima: Build dan push container Docker
+      - name: Build container
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}, ghcr.io/mashumabduljabbar/order-service:latest
